@@ -52,9 +52,12 @@ export class ResumoHandler implements IHandler {
         const contents = await this.generateChatCompletionContentPart(messages, memberId);
 
         const systemPrompt = `Vou te enviar várias mensagens de uma conversa de um grupo do
-                whatsapp deste modelo: "{Autor}: {Mensagem}". Quero que você me responda com
-                um resumo do que foi dito mencionando os nomes das pessoas sempre que for um nome legível.
-                Faça a resposta como se fosse um integrante do grupo dizendo o que foi dito.`;
+whatsapp deste modelo: "{Autor}: {Mensagem}".
+Caso um mensagem seja uma resposta a outra, será exibido assim:
+"{Autor} respondendo uma mensagem de {Autor da mensagem respondida}: {Mensagem}".
+Quero que você me responda com um resumo do que foi dito mencionando os nomes 
+das pessoas sempre que for um nome legível. Faça a resposta como se fosse 
+um integrante do grupo dizendo o que foi dito.`;
 
         const res = await this.responseService.generateResponse(systemPrompt, contents);
 
@@ -80,7 +83,18 @@ export class ResumoHandler implements IHandler {
         for (const msg of msgs) {
             if (msg.type === 'chat') {
                 const author = members[msg.author ?? ''] ?? msg.author;
-                const text = `${author}: ${msg.body}`;
+
+                const quotedMessage = msg.hasQuotedMsg
+                    ? await msg.getQuotedMessage()
+                    : null;
+
+                const quoteAuthor = msg.hasQuotedMsg
+                    ? (members[quotedMessage?.author ?? ''] ?? quotedMessage?.author)
+                    : null;
+
+                const text = quoteAuthor
+                    ? `${author} respondendo uma mensagem de ${quoteAuthor}: ${msg.body}`
+                    : `${author}: ${msg.body}`;
 
                 const content: ChatCompletionContentPart = {
                     type: 'text',
