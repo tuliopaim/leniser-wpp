@@ -28,8 +28,9 @@ class Application implements IApplication {
         this.messageRevokeListener.initialize();
         this.groupJoinListener.initialize();
 
-        this.logger.info('Initializing wwapweb client');
+        this.logger.info('Initializing whatsapp-web client');
         this.wweb.initialize();
+        this.logger.info('whatsapp-web client initialized');
     }
 
     public async updateConfigs() {

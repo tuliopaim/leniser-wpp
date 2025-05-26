@@ -1,4 +1,4 @@
-# Use uma imagem base do Node.js
+ # Use uma imagem base do Node.js
 FROM node:20-buster
 
 # Instala as dependências necessárias para o Puppeteer
@@ -43,6 +43,7 @@ RUN apt-get update && apt-get install -y \
     xdg-utils \
     wget \
     ffmpeg \
+    chromium \
     --no-install-recommends && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
@@ -65,6 +66,10 @@ RUN yarn build
 
 # Expõe a porta que a aplicação irá rodar (ajuste conforme necessário)
 EXPOSE 3000
+
+# Set environment variables to skip Puppeteer download and use system Chromium
+ENV PUPPETEER_SKIP_DOWNLOAD='true'
+ENV PUPPETEER_EXECUTABLE_PATH='/usr/bin/chromium'
 
 # Define o comando para iniciar a aplicação
 CMD ["yarn", "start"]
